@@ -65,10 +65,9 @@ function getResults(req, res) {
     return res.status(200).json([]); // Return an empty array if no results yet.
   }
 
-  // Bonus Feature: CSV Export!
-  // We check the 'Accept' header. If the client asks for 'text/csv', we send a CSV file.
-  const acceptHeader = req.get('Accept');
-  if (acceptHeader === 'text/csv') {
+  const exportCsv = req.query.exportcsv === 'true'; // Check query param
+
+  if (exportCsv) {
     // Create the CSV header row
     const csvHeader = 'name,role,company,intent,score,reasoning\n';
     // Create a CSV row for each result
@@ -79,13 +78,14 @@ function getResults(req, res) {
     const csvContent = csvHeader + csvRows;
 
     res.header('Content-Type', 'text/csv');
-    res.attachment('scored_leads.csv'); // This tells the browser to download the file.
+    res.attachment('scored_leads.csv'); // Force download
     return res.send(csvContent);
   } else {
-    // By default, or if they ask for 'application/json', we send JSON.
+    // Default: return JSON
     return res.status(200).json(results);
   }
 }
+
 
 
 module.exports = {
