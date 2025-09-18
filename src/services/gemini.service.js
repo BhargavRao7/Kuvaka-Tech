@@ -35,11 +35,21 @@ async function getAiScore(offer, lead) {
     const response = await axios.post(url, {
       contents: [{ parts: [{ text: prompt }] }],
     });
-    const rawContent = response.data.candidates[0].content.parts[0].text;
+
+    let rawContent = response.data.candidates[0].content.parts[0].text.trim();
+
+    // Strip out markdown fences if present
+    if (rawContent.startsWith("```")) {
+      rawContent = rawContent.replace(/```json|```/g, "").trim();
+    }
+
     const jsonResponse = JSON.parse(rawContent);
     return jsonResponse;
   } catch (error) {
-    console.error('Error contacting Gemini API:', error.response ? error.response.data : error.message);
+    console.error(
+      'Error contacting Gemini API:',
+      error.response ? error.response.data : error.message
+    );
     return {
       intent: 'Low',
       reasoning: 'AI analysis failed or could not be completed.',
